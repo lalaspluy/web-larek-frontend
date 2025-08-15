@@ -133,3 +133,17 @@ export function createElement<
     }
     return element;
 }
+
+/*export function formatPrice(value: number): string {
+    return `${value} синапсов`;
+}*/
+
+export function formatPrice(count: number): string {
+    const lastDigit = count % 10;
+    const lastTwoDigits = count % 100;
+    
+    if (lastTwoDigits >= 11 && lastTwoDigits <= 19) return count+' синапсов';
+    if (lastDigit === 1) return count+' синапс';
+    if (lastDigit >= 2 && lastDigit <= 4) return count+' синапса';
+    return count+' синапсов';
+}

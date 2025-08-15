@@ -1,19 +1,3 @@
-/*export type PaimentWay = 'online' | 'uponReceive' | null;
-export type ProductCategory= 'button' | 'softSkill' | 'another' | 'additional';*/
-/*export enum PaimentWay {
-  online = 'Онлайн',
-  softSkill = 'софт-скил',
-  another = 'другое',
-  additional = 'дополнительное'
-}; 
-
-export enum ProductCategory {
-  button = 'кнопка',
-  softSkill = 'софт-скил',
-  another = 'другое',
-  additional = 'дополнительное'
-}; */
-
 export interface IProduct {
 	id: string;
   description: string;
@@ -28,7 +12,7 @@ export type TBasketItem = Pick<IProduct, 'id' | 'title' | 'price'>;
 export type TCatalogItem = Pick<IProduct, 'id' | 'title' | 'price' | 'image' | 'category'>;
 
 export interface IOrderFormFirst {
-  payment: string;
+  payment: string | null;
   address: string;
 }
 
@@ -53,5 +37,4 @@ export interface IAppState {
   basket: string[];
   preview: string | null;
   order: IOrder | null;
-  //loading: boolean;
 }
