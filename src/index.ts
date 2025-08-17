@@ -2,7 +2,7 @@ import './scss/styles.scss';
 
 import {AppApi} from "./components/AppApi";
 import {API_URL, CDN_URL} from "./utils/constants";
-import {EventEmitter} from "./components/base/events";
+import {EventEmitter} from "./components/base/Events";
 import {AppState, CatalogChangeEvent, ProductItem} from "./components/AppData";
 import {Page} from "./components/Page";
 import {Card} from "./components/Card";
@@ -51,14 +51,22 @@ const orderSecond = new OrderSecond(cloneTemplate(contactsTemplate), events);
 
 // Изменились элементы каталога
 events.on<CatalogChangeEvent>('items:changed', () => {
-    // Добавляем проверку на существование каталога
+    // Проверка на существование каталога
     if (!appData.catalog) return;
 
+    
     page.catalog = appData.catalog.map(item => {
+        // Определяем состояние кнопки
+        const isUnavailable = item.price === null;
+        const buttonText = isUnavailable 
+            ? 'Недоступно' 
+            : item.inBasket ? 'Убрать' : 'Купить';
+
         const card = new Card('card', cloneTemplate(cardCatalogTemplate), {
             onClick: () => events.emit('product:select', item)
-        });
-        card.inBasket = item.inBasket;
+        }, buttonText, isUnavailable);
+        
+        // Устанавливаем свойства карточки
         return card.render({
             title: item.title,
             image: item.image,
@@ -159,20 +167,26 @@ events.on('preview:changed', (item: ProductItem) => {
     if (!item) return;
 
     currentPreviewItem = item; // Сохраняем текущий товар
+
+    // Определяем состояние кнопки
+    const isUnavailable = item.price === null;
+    const buttonText = isUnavailable 
+        ? 'Недоступно' 
+        : item.inBasket ? 'Убрать' : 'Купить';
     
     currentPreviewCard = new Card('card', cloneTemplate(cardPreviewTemplate), {
         onClick: () => {
-            if (item.inBasket) {
-                appData.removeFromBasket(item.id);
-            } else {
-                appData.addToBasket(item);
+            if (item.price !== null) {
+                if (item.inBasket) {
+                    appData.removeFromBasket(item.id);
+                } else {
+                    appData.addToBasket(item);
+                }
             }
             //убрать emit из корзин
             //events.emit('basket:changed');
         }
-    });
-
-    currentPreviewCard.inBasket = item.inBasket;
+    }, buttonText, isUnavailable);
 
     modal.render({
         content: currentPreviewCard.render({
@@ -181,7 +195,6 @@ events.on('preview:changed', (item: ProductItem) => {
             description: item.description,
             price: item.price,
             category: item.category,
-            //button: item.inBasket ? 'Убрать' : 'Купить'
         })
     });
 });
@@ -189,7 +202,6 @@ events.on('preview:changed', (item: ProductItem) => {
 // Обновление корзины
 events.on('basket:changed', () => {
     page.counter = appData.order.items.length;
-    //events.emit('items:changed'); 
 
     // Обновляем данные корзины
     const basketItems = appData.order.items.map(id => {
@@ -211,11 +223,15 @@ events.on('basket:changed', () => {
     // Обновление открытого превью
     if (currentPreviewItem && currentPreviewCard) {
         const isInBasket = appData.isProductInBasket(currentPreviewItem.id);
-        currentPreviewItem.inBasket = isInBasket;
         
-        // Обновляем кнопку через сеттер
-        currentPreviewCard.inBasket = isInBasket;
+        // Обновляем текст кнопки
+        if (currentPreviewItem.price !== null) {
+            currentPreviewCard.setButtonText(isInBasket ? 'Убрать' : 'Купить');
+        }
     }
+
+    // Обновляем каталог
+    events.emit('items:changed');
 });
 
 // Открытие корзины

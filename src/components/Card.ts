@@ -22,11 +22,9 @@ export class Card extends Component<ICard> {
     protected _category: HTMLElement;
     protected _price: HTMLElement;
     protected _button: HTMLButtonElement;
-    protected _inBasket: boolean;
-    protected _priceValue: number | null = null; 
 
 
-    constructor(protected blockName: string, container: HTMLElement, actions?: ICardActions) {
+    constructor(protected blockName: string, container: HTMLElement, actions?: ICardActions, buttonText?: string, disabled?: boolean) {
         super(container);
 
         this._title = ensureElement<HTMLElement>(`.${blockName}__title`, container);
@@ -35,7 +33,15 @@ export class Card extends Component<ICard> {
         this._description = container.querySelector(`.${blockName}__text`);
         this._price = container.querySelector(`.${blockName}__price`);
         this._category = container.querySelector(`.${blockName}__category`);
-
+        
+        // Управление кнопкой через конструктор
+        if (buttonText !== undefined && this._button) {
+            this._button.textContent = buttonText;
+        }
+        if (disabled !== undefined && this._button) {
+            this._button.disabled = disabled;
+        }
+        
         if (actions?.onClick) {
             if (this._button) {
                 this._button.addEventListener('click', actions.onClick);
@@ -83,29 +89,22 @@ export class Card extends Component<ICard> {
         }
     }
 
-    set buttonText(value: string) {
+    setButtonText(value: string) {
       if (this._button) {
           this._button.textContent = value;
       }
     }
 
-    setButtonDisabled(state: boolean) {
+    disableButton() {
         if (this._button) {
-            this._button.disabled = state;
-            //this._button.textContent = 'Недоступно';
+            this._button.disabled = true;
         }
     }
 
-    set inBasket(value: boolean) {
-        
-        this._inBasket = value;
-        this.updateButton();
-    }
-
-    updateButton() {
-        if (!this._button) return;
-    
-        this._button.textContent = this._inBasket ? 'Убрать' : 'Купить';
+    enableButton() {
+        if (this._button) {
+            this._button.disabled = false;
+        }
     }
 
     set category(value: string) {
@@ -126,10 +125,11 @@ export class Card extends Component<ICard> {
         if (this._price) {
             if (value === null) {
                 this._price.textContent = 'Бесценно';
-                this.setButtonDisabled(true); 
+                this.disableButton();
+                this.setButtonText('Недоступно');
             } else {
                 this._price.textContent = formatPrice(value);
-                this.setButtonDisabled(false); 
+                this.enableButton();
             }
         }
     }

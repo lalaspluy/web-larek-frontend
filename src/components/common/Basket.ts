@@ -1,8 +1,8 @@
 import {Component} from "../base/Component";
-import {cloneTemplate, ensureElement, formatPrice} from "../../utils/utils";
-import {EventEmitter} from "../base/events";
+import {cloneTemplate, ensureElement, formatPrice, createElement} from "../../utils/utils";
+import {EventEmitter} from "../base/Events";
 
-interface IBasketItem {
+/*interface IBasketItem {
     id: string;
     title: string;
     price: number;
@@ -12,22 +12,26 @@ interface IBasketItem {
 interface IBasketView {
     items: IBasketItem[];
     total: number;
+}*/
+interface IBasketView {
+  items: HTMLElement[];  
+  total: number;          
 }
 
 export class Basket extends Component<IBasketView> {
     protected _list: HTMLElement;
     protected _total: HTMLElement;
     protected _button: HTMLButtonElement;
-    protected _itemTemplate: HTMLTemplateElement;
+    //protected _itemTemplate: HTMLTemplateElement;
 
     constructor(
         container: HTMLElement, 
         protected events: EventEmitter,
-        itemTemplate: HTMLTemplateElement
+        //itemTemplate: HTMLTemplateElement
     ) {
         super(container);
 
-        this._itemTemplate = itemTemplate;
+        //this._itemTemplate = itemTemplate;
         this._list = ensureElement<HTMLElement>('.basket__list', this.container);
         this._total = ensureElement<HTMLElement>('.basket__price', this.container);
         this._button = ensureElement<HTMLButtonElement>('.basket__button', this.container);
@@ -37,24 +41,30 @@ export class Basket extends Component<IBasketView> {
         });
     }
 
-    render(state: Partial<IBasketView>): HTMLElement {
+    /*render(state: Partial<IBasketView>): HTMLElement {
       if (state.items) {
-        const items = state.items.map((item, index) => 
-          this.createItem({...item, index: index + 1})
-        );
-        
-        this._list.replaceChildren(...items);
+        if (state.items.length === 0) {
+          const emptyMessage = document.createElement('p');
+            emptyMessage.textContent = 'Корзина пуста';
+            this._list.replaceChildren(emptyMessage);
+        } else {
+          const items = state.items.map((item, index) => 
+            this.createItem({...item, index: index + 1})
+          );
+          
+          this._list.replaceChildren(...items);
+        }
         this.setDisabled(this._button, !state.items.length);
       }
       
       if (state.total !== null && state.total !== undefined) {
         this.total = state.total;
       }
-      
+
       return this.container;
-    }
+    }*/
   
-    private createItem(item: IBasketItem): HTMLElement {
+    /*private createItem(item: IBasketItem): HTMLElement {
       const element = cloneTemplate(this._itemTemplate);
       
       // Прямое использование элемента без вложенного поиска
@@ -69,7 +79,7 @@ export class Basket extends Component<IBasketView> {
       
       deleteButton.addEventListener('click', (e) => {
           e.preventDefault();
-          this.events.emit('basket:remove', { id: item.id }); // Передаем объект с id
+          this.events.emit('basket:remove', { id: item.id });
       });
       
       return element;
@@ -77,5 +87,5 @@ export class Basket extends Component<IBasketView> {
   
     set total(value: number) {
       this.setText(this._total, formatPrice(value));
-    }
+    }*/
   }

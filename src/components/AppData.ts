@@ -31,15 +31,6 @@ export class AppState extends Model<IAppState> {
     formErrors: TFormErrors = {};
     currentStep: 'first' | 'second' = 'first';
 
-    // Работа с корзиной
-    /*toggleOrderedProduct(id: string, isIncluded: boolean) {
-        if (isIncluded) {
-            this.order.items = this.order.items.filter(item => item !== id);
-        } else {
-            this.order.items = [...this.order.items, id];
-        }
-        this.emitChanges('basket:changed');
-    }*/
     addToBasket(item: ProductItem) {
         if (!this.order.items.includes(item.id)) {
             this.order.items.push(item.id);
@@ -134,7 +125,7 @@ export class AppState extends Model<IAppState> {
             address: '',
             payment: '',
             items: [],
-            total: 0 // Инициализируем total
+            total: 0
         };
         this.events.emit('order:success');
     }
