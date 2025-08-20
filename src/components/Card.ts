@@ -1,21 +1,13 @@
 import {Component} from "./base/Component";
 import {ensureElement, formatPrice } from "../utils/utils";
 import { getCategoryClass, CATEGORY_CLASS_MAP } from "../utils/categorymap";
+import {IProduct, ProductCategory} from "../types";
 
-interface ICardActions {
+export interface ICardActions {
     onClick: (event: MouseEvent) => void;
 }
 
-export interface ICard {
-    title: string;
-    description: string | string[];
-    image: string;
-    category: string;
-    price: number;
-    button: string; 
-}
-
-export class Card extends Component<ICard> {
+export class Card extends Component<IProduct> {
     protected _title: HTMLElement;
     protected _image: HTMLImageElement;
     protected _description: HTMLElement;
@@ -24,23 +16,16 @@ export class Card extends Component<ICard> {
     protected _button: HTMLButtonElement;
 
 
-    constructor(protected blockName: string, container: HTMLElement, actions?: ICardActions, buttonText?: string, disabled?: boolean) {
+    constructor(protected blockName: string, container: HTMLElement, actions?: ICardActions) {
         super(container);
 
         this._title = ensureElement<HTMLElement>(`.${blockName}__title`, container);
         this._image = ensureElement<HTMLImageElement>(`.${blockName}__image`, container);
-        this._button = container.querySelector(`.${blockName}__button`);
-        this._description = container.querySelector(`.${blockName}__text`);
-        this._price = container.querySelector(`.${blockName}__price`);
-        this._category = container.querySelector(`.${blockName}__category`);
+        this._button = container.querySelector<HTMLButtonElement>(`.${blockName}__button`);
+        this._description = container.querySelector<HTMLElement>(`.${blockName}__text`);
+        this._price = ensureElement<HTMLElement>(`.${blockName}__price`, container);
+        this._category = container.querySelector<HTMLElement>(`.${blockName}__category`);
         
-        // Управление кнопкой через конструктор
-        if (buttonText !== undefined && this._button) {
-            this._button.textContent = buttonText;
-        }
-        if (disabled !== undefined && this._button) {
-            this._button.disabled = disabled;
-        }
         
         if (actions?.onClick) {
             if (this._button) {
@@ -71,43 +56,11 @@ export class Card extends Component<ICard> {
         this.setImage(this._image, value, this.title)
     }
 
-    set description(value: string | string[]) {
-        if (!this._description) return;
-        
-        // Очищаем текущее содержимое
-        this._description.innerHTML = '';
-        
-        if (Array.isArray(value)) {
-            value.forEach(str => {
-                const element = document.createElement('p');
-                element.classList.add(`${this.blockName}__text`);
-                element.textContent = str;
-                this._description.appendChild(element);
-            });
-        } else {
-            this.setText(this._description, value);
-        }
+    set description(value: string) {
+        this.setText(this._description, value);
     }
 
-    setButtonText(value: string) {
-      if (this._button) {
-          this._button.textContent = value;
-      }
-    }
-
-    disableButton() {
-        if (this._button) {
-            this._button.disabled = true;
-        }
-    }
-
-    enableButton() {
-        if (this._button) {
-            this._button.disabled = false;
-        }
-    }
-
-    set category(value: string) {
+    set category(value: ProductCategory) {
         if (!this._category) return;
         
         this.setText(this._category, value);
@@ -122,15 +75,24 @@ export class Card extends Component<ICard> {
     }
 
     set price(value: number | null) {
-        if (this._price) {
-            if (value === null) {
-                this._price.textContent = 'Бесценно';
-                this.disableButton();
-                this.setButtonText('Недоступно');
-            } else {
-                this._price.textContent = formatPrice(value);
-                this.enableButton();
-            }
+        if (value === null) {
+            this.setText(this._price, 'Бесценно');
+            this.setButtonState(false);
+        } else {
+            this.setText(this._price, formatPrice(value));
+            this.setButtonState(true);
+        }
+    }
+
+    setButtonText(value: string) {
+      if (this._button) {
+          this._button.textContent = value;
+      }
+    }
+
+    setButtonState(enabled: boolean) {
+        if (this._button) {
+            this._button.disabled = !enabled;
         }
     }
 }

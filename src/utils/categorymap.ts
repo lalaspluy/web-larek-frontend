@@ -1,5 +1,8 @@
+import { ProductCategory } from "../types";
+
+// Тип для маппинга категорий
 export type CategoryClassMap = {
-  [category: string]: string;
+  [key in ProductCategory]: string;
 };
 
 // Маппинг категорий к CSS-классам
@@ -12,7 +15,7 @@ export const CATEGORY_CLASS_MAP: CategoryClassMap = {
 };
 
 // Функция для получения CSS-класса по категории
-export function getCategoryClass(category: string): string {
+export function getCategoryClass(category: ProductCategory): string {
   const containerName = "card__category";
-  return containerName + (CATEGORY_CLASS_MAP[category.toLowerCase()] || "_other");
+  return containerName + (CATEGORY_CLASS_MAP[category] || "_other");
 }

@@ -1,15 +1,20 @@
+export type ProductCategory = 'софт-скил' | 'хард-скил' | 'дополнительное' | 'кнопка' | 'другое';
+
 export interface IProduct {
 	id: string;
   description: string;
   image: string;
   title: string;
-  category: string;
-  price: number;
+  category: ProductCategory;
+  price: number | null;
 }
 
-export type TBasketItem = Pick<IProduct, 'id' | 'title' | 'price'>;
-
-export type TCatalogItem = Pick<IProduct, 'id' | 'title' | 'price' | 'image' | 'category'>;
+export interface IBasketItem {
+  id: string;
+  title: string;
+  price: number;
+  index: number;
+}
 
 export interface IOrderFormFirst {
   payment: string | null;
@@ -37,4 +42,5 @@ export interface IAppState {
   basket: string[];
   preview: string | null;
   order: IOrder | null;
+  formErrors: TFormErrors;
 }

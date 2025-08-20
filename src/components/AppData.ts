@@ -1,6 +1,5 @@
-
 import {Model} from "./base/Model";
-import {TFormErrors, IAppState, IProduct, IOrder, IOrderFormFirst, IOrderFormSecond} from "../types";
+import {TFormErrors, IAppState, ProductCategory, IProduct, IOrder, IOrderFormFirst, IOrderFormSecond, IBasketItem} from "../types";
 
 export type CatalogChangeEvent = {
     catalog: ProductItem[]
@@ -11,14 +10,13 @@ export class ProductItem extends Model<IProduct> {
     id: string;
     image: string;
     title: string;
-    price: number;
-    category: string;
+    price: number | null;
+    category: ProductCategory;
     inBasket: boolean = false;
 }
 
 export class AppState extends Model<IAppState> {
     catalog: ProductItem[];
-    loading: boolean;
     order: IOrder = {
         email: '',
         phone: '',
@@ -31,10 +29,22 @@ export class AppState extends Model<IAppState> {
     formErrors: TFormErrors = {};
     currentStep: 'first' | 'second' = 'first';
 
+    getBasketItemsForView(): IBasketItem[] {
+        return this.order.items.map((id, index) => {
+            const product = this.catalog.find(item => item.id === id);
+            return {
+                id: id,
+                title: product.title,
+                price: product.price,
+                index: index + 1
+            };
+        });
+    }
+
     addToBasket(item: ProductItem) {
         if (!this.order.items.includes(item.id)) {
             this.order.items.push(item.id);
-            item.inBasket = true; // Устанавливаем флаг
+            item.inBasket = true; 
             this.emitChanges('basket:changed');
         }
     }
@@ -42,7 +52,7 @@ export class AppState extends Model<IAppState> {
     removeFromBasket(id: string) {
         this.order.items = this.order.items.filter(item => item !== id);
         const product = this.catalog.find(item => item.id === id);
-        if (product) product.inBasket = false; // Сбрасываем флаг
+        if (product) product.inBasket = false; 
         this.emitChanges('basket:changed');
     }
 
@@ -55,8 +65,9 @@ export class AppState extends Model<IAppState> {
         this.emitChanges('basket:changed');
     }
 
-    isProductInBasket(id: string): boolean {
-        return this.order.items.includes(id);
+    getButtonText(item: ProductItem): string {
+        if (item.price === null) return 'Недоступно';
+        return item.inBasket ? 'Убрать' : 'Купить';
     }
 
     getTotal() {
@@ -76,19 +87,16 @@ export class AppState extends Model<IAppState> {
         this.emitChanges('preview:changed', item);
     }
 
-    // Для первого шага
     setOrderFirstStepField(field: keyof IOrderFormFirst, value: string) {
         this.order[field] = value;
         this.validateOrderFirstStep();
     }
 
-    // Для второго шага
     setOrderSecondStepField(field: keyof IOrderFormSecond, value: string) {
         this.order[field] = value;
         this.validateOrderSecondStep();
     }
 
-    // Валидация первого шага
     validateOrderFirstStep() {
         const errors: TFormErrors = {};
         if (!this.order.address) {
@@ -102,7 +110,6 @@ export class AppState extends Model<IAppState> {
         return Object.keys(errors).length === 0;
     }
 
-    // Валидация второго шага
     validateOrderSecondStep() {
         const errors: TFormErrors = {};
         if (!this.order.email) {
@@ -116,7 +123,6 @@ export class AppState extends Model<IAppState> {
         return Object.keys(errors).length === 0;
     }
 
-    // Завершение заказа
     completeOrder() {
         this.clearBasket();
         this.order = {
