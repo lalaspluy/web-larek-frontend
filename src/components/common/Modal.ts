@@ -1,6 +1,6 @@
 import {Component} from "../base/Component";
 import {ensureElement} from "../../utils/utils";
-import {IEvents} from "../base/Events";
+import {IEvents} from "../base/events";
 
 interface IModalData {
     content: HTMLElement;
@@ -25,13 +25,27 @@ export class Modal extends Component<IModalData> {
         this._content.replaceChildren(value);
     }
 
+    toggleModal(state: boolean = true) {
+        this.toggleClass(this.container, 'modal_active', state);
+    }
+    // Обработчик в виде стрелочного метода, чтобы не терять контекст `this`
+    handleEscape = (evt: KeyboardEvent) => {
+        if (evt.key === 'Escape') {
+            this.close();
+        }
+    };
+
     open() {
-        this.container.classList.add('modal_active');
+        this.toggleModal();
+        // навешиваем обработчик при открытии
+        document.addEventListener('keydown', this.handleEscape);
         this.events.emit('modal:open');
     }
 
     close() {
-        this.container.classList.remove('modal_active');
+        this.toggleModal(false);
+        // удаляем обработчик при закрытии
+        document.removeEventListener('keydown', this.handleEscape);
         this.content = null;
         this.events.emit('modal:close');
     }

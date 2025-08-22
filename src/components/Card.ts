@@ -26,7 +26,6 @@ export class Card extends Component<IProduct> {
         this._price = ensureElement<HTMLElement>(`.${blockName}__price`, container);
         this._category = container.querySelector<HTMLElement>(`.${blockName}__category`);
         
-        
         if (actions?.onClick) {
             if (this._button) {
                 this._button.addEventListener('click', actions.onClick);
@@ -65,13 +64,13 @@ export class Card extends Component<IProduct> {
         
         this.setText(this._category, value);
         
+        const baseClass = `${this.blockName}__category`;
         // Удаляем все возможные классы категорий
         Object.values(CATEGORY_CLASS_MAP).forEach(cls => {
-            this._category.classList.remove(cls);
+            this.toggleClass(this._category, baseClass+cls, false)
         });
-        
         // Добавляем правильный класс для категории
-        this._category.classList.add(getCategoryClass(value));
+        this.toggleClass(this._category, getCategoryClass(value, baseClass), true);
     }
 
     set price(value: number | null) {
@@ -86,13 +85,13 @@ export class Card extends Component<IProduct> {
 
     setButtonText(value: string) {
       if (this._button) {
-          this._button.textContent = value;
+          this.setText(this._button, value);
       }
     }
 
     setButtonState(enabled: boolean) {
         if (this._button) {
-            this._button.disabled = !enabled;
+            this.setDisabled(this._button, !enabled);
         }
     }
 }

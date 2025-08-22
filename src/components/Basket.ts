@@ -1,6 +1,6 @@
 import {Component} from "./base/Component";
 import {cloneTemplate, ensureElement, formatPrice, createElement} from "../utils/utils";
-import {EventEmitter} from "./base/Events";
+import {EventEmitter} from "./base/events";
 import {IBasketItem} from "../types";
 
 interface IBasketView {
@@ -41,9 +41,9 @@ export class Basket extends Component<IBasketView> {
         const priceEl = ensureElement('.card__price', element);
         const deleteButton = ensureElement('.basket__item-delete', element);
         
-        indexEl.textContent = String(item.index);
-        titleEl.textContent = item.title;
-        priceEl.textContent = formatPrice(item.price);
+        this.setText(indexEl, String(item.index));
+        this.setText(titleEl, item.title);
+        this.setText(priceEl, formatPrice(item.price));
         
         deleteButton.addEventListener('click', (e) => {
             e.preventDefault();
@@ -53,15 +53,21 @@ export class Basket extends Component<IBasketView> {
         return element;
     }
 
+    
+    toggleButtonDisabled(state: boolean) {
+        this.setDisabled(this._button, state);
+    }
+
     set items(items: HTMLElement[]) {
       if (items.length) {
           this._list.replaceChildren(...items);
-          this.setDisabled(this._button, false);
+          this.toggleButtonDisabled(false);
       } else {
           this._list.replaceChildren(createElement<HTMLParagraphElement>('p', {
               textContent: 'Корзина пуста'
           }));
-          this.setDisabled(this._button, true);
+          //this.setDisabled(this._button, true);
+          this.toggleButtonDisabled(true);
       }
     }
     set total(value: number) {

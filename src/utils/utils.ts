@@ -134,10 +134,6 @@ export function createElement<
     return element;
 }
 
-/*export function formatPrice(value: number): string {
-    return `${value} синапсов`;
-}*/
-
 export function formatPrice(count: number): string {
     const lastDigit = count % 10;
     const lastTwoDigits = count % 100;

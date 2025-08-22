@@ -1,6 +1,6 @@
 import { Form } from "./common/Form";
 import { IOrderFormFirst } from "../types";
-import { IEvents } from "./base/Events";
+import { IEvents } from "./base/events";
 import { ensureElement } from "../utils/utils";
 
 export class OrderFirst extends Form<IOrderFormFirst> {
@@ -22,25 +22,6 @@ export class OrderFirst extends Form<IOrderFormFirst> {
         this._cashButton.addEventListener('click', () => this.selectPayment('cash'));
     }
 
-    private selectPayment(method: string) {
-        // Снимаем выделение со всех кнопок
-        this._cardButton.classList.remove('button_alt-active');
-        this._cashButton.classList.remove('button_alt-active');
-        
-        // Выделяем выбранную кнопку
-        if (method === 'card') {
-            this._cardButton.classList.add('button_alt-active');
-        } else {
-            this._cashButton.classList.add('button_alt-active');
-        }
-        
-        // Эмитируем событие изменения
-        this.events.emit(`${this.container.name}.payment:change`, {
-            field: 'payment',
-            value: method
-        });
-    }
-
     // Установка адреса доставки
     set address(value: string) {
         this._addressInput.value = value;
@@ -48,14 +29,27 @@ export class OrderFirst extends Form<IOrderFormFirst> {
 
    // Установка способа оплаты (визуальное выделение)
    set payment(value: string) {
+        this.toggleCard(value === 'card');
+        this.toggleCash(value === 'cash');
+    }
 
-        if (value === 'card') {
-            this._cardButton.classList.add('button_alt-active');
-            this._cashButton.classList.remove('button_alt-active');
-        } else if (value === 'cash') {
-            this._cashButton.classList.add('button_alt-active');
-            this._cardButton.classList.remove('button_alt-active');
-        }
+    private selectPayment(method: string) {
+        // Выделяем выбранную кнопку
+        this.payment = method;
+        
+        // Эмитируем событие изменения
+        this.events.emit(`${this.container.name}.payment:change`, {
+            field: 'payment',
+            value: method
+        });
+    }
+    
+    toggleCard(state: boolean = true) {
+        this.toggleClass(this._cardButton, 'button_alt-active', state);
+    }
+
+    toggleCash(state: boolean = true) {
+        this.toggleClass(this._cashButton, 'button_alt-active', state);
     }
 
 }

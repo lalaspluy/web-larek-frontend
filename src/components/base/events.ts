@@ -1,4 +1,3 @@
-
 type EventName = string | RegExp;
 type Subscriber = Function;
 type EmitterEvent = {

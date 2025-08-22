@@ -15,7 +15,6 @@ export const CATEGORY_CLASS_MAP: CategoryClassMap = {
 };
 
 // Функция для получения CSS-класса по категории
-export function getCategoryClass(category: ProductCategory): string {
-  const containerName = "card__category";
-  return containerName + (CATEGORY_CLASS_MAP[category] || "_other");
+export function getCategoryClass(category: ProductCategory, baseClass: string): string {
+  return baseClass + (CATEGORY_CLASS_MAP[category] || "_other");
 }
